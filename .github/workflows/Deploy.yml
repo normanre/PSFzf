@@ -3,10 +3,6 @@ name: Package
 on:
   workflow_dispatch:
     inputs:
-      version:
-        description: "Module version (e.g. 2.7.9)"
-        required: true
-        type: string
       prerelease:
         description: "Mark as prerelease (sets Prerelease in manifest)"
         required: false
@@ -29,7 +25,7 @@ jobs:
         shell: pwsh
 
       - name: Package module
-        run: ./.github/scripts/Package.ps1 -Version '${{ inputs.version }}' -IsPrerelease:${{ inputs.prerelease }}
+        run: ./.github/scripts/Package.ps1 -Version '2.7.9' -IsPrerelease:${{ inputs.prerelease }}
         shell: pwsh
 
       - name: Upload artifact
