@@ -1,25 +1,39 @@
-name: Deploy
+name: Package
 
 on:
-    release:
-        types: [created]
+  workflow_dispatch:
+    inputs:
+      version:
+        description: "Module version (e.g. 2.7.9)"
+        required: true
+        type: string
+      prerelease:
+        description: "Mark as prerelease (sets Prerelease in manifest)"
+        required: false
+        type: boolean
+        default: false
 
 jobs:
-    windows:
+  windows:
+    runs-on: windows-latest
 
-        runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v5
 
-        steps:
-        - uses: actions/checkout@v5
-        - name: Install needed software
-          run: ./.github/scripts/Install.ps1
-          shell: pwsh
-        - name: Build PSFzf-Binary
-          run: ./.github/scripts/Build.ps1
-          shell: pwsh
-        - name: Publish
-          run: ./.github/scripts/Deploy.ps1
-          shell: pwsh
-          env:
-            POWERSHELLGALLERY_APIKEY: ${{ secrets.POWERSHELLGALLERY_APIKEY }}
-            GITHUB_PRERELEASE: ${{ github.event.release.prerelease }}
+      - name: Install needed software
+        run: ./.github/scripts/Install.ps1
+        shell: pwsh
+
+      - name: Build PSFzf-Binary
+        run: ./.github/scripts/Build.ps1
+        shell: pwsh
+
+      - name: Package module
+        run: ./.github/scripts/Package.ps1 -Version '${{ inputs.version }}' -IsPrerelease:${{ inputs.prerelease }}
+        shell: pwsh
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: PSFzf-${{ inputs.version }}
+          path: out/PSFzf-${{ inputs.version }}.zip
